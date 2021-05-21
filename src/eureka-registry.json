@@ -1,0 +1,26 @@
+{
+  "eureka": {
+    "hostname": "localhost",
+    "port": 8761,
+    "statusPageUrlPath": "",
+    "healthCheckUrlPath": "",
+    "servicePath": "/eureka/apps/",
+    "heartbeatInterval": 30000
+  },
+  "apps": [
+    {
+      "name": "teste-app-1",
+      "ip": "127.0.0.1",
+      "hostname": "localhost",
+      "port": 80,
+      "vipAddress": "MY-TESTE-APP-1",
+      "statusPageUrl": "http://localhost:80/status",
+      "healthCheckUrl": "http://localhost:80/health"
+    },
+    {
+      "name": "teste-app-1",
+      "port": 80
+    }
+  ]
+}
+
