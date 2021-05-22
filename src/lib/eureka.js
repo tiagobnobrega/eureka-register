@@ -1,8 +1,6 @@
 const {promisify} = require('util')
 const {Eureka} = require('eureka-js-client')
 
-let client = null
-
 const register = ({
   appName,
   hostname,
@@ -31,7 +29,7 @@ const register = ({
     const eureka = new Eureka({
       instance: {
         app: APP_NAME,
-        hostName: IP,
+        hostName: HOSTNAME || IP,
         instanceId: `${HOSTNAME}:${PORT}`,
         ipAddr: IP,
         vipAddress: vipAddr || `${HOSTNAME.toUpperCase()}`,
@@ -64,13 +62,13 @@ const register = ({
         // logger.error('Eureka start error', err)
         return reject(err)
       }
-      client = eureka
       resolve(eureka)
     })
+    return eureka
   })
 )
 
-const deregister = async () => {
+const deregister = async client => {
   try {
     if (client) {
       // logger.info('Eureka deregister...')
@@ -86,14 +84,7 @@ const deregister = async () => {
   }
 }
 
-const getInstancesByAppId = appId => client.getInstancesByAppId(appId)
-
-const getInstancesByVipAddress = vipAddress => client.getInstancesByVipAddress(vipAddress)
-
 module.exports = {
   register,
   deregister,
-  getInstancesByAppId,
-  getInstancesByVipAddress,
-  client: () => client,
 }

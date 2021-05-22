@@ -1,5 +1,6 @@
+/* eslint-disable no-process-exit */
 const path = require('path')
-const fs = require('path')
+const fs = require('fs')
 const {Command, flags} = require('@oclif/command')
 const eureka = require('../lib/eureka')
 
@@ -24,6 +25,7 @@ class RegisterCommand extends Command {
 
     apps.forEach((app, index) => {
       if (!app.name) configErrors.push(`Required property "name" not found  for app index ${index}`)
+      if (!app.hostname) configErrors.push(`Required property "hostname" not found  for app index ${index}, name ${app.name || 'unknown'}`)
       if (!app.port) configErrors.push(`Required property "name" not found for app: index ${index}, name ${app.name || 'unknown'}`)
       if (!Number.isFinite(app.port)) configErrors.push(`Property "port" must be a number for app: index ${index}, name ${app.name || 'unknown'}`)
     })
@@ -51,8 +53,8 @@ class RegisterCommand extends Command {
 
   async registerApp(eurekaConfig, app) {
     const appHostname = app.hostname || 'localhost'
-    const statusPageUrl = app.statusPageUrl ||  `http://${appHostname}:${app.port}/actuator/status`
-    const healthCheckUrl = app.statusPageUrl ||  `http://${appHostname}:${app.port}/actuator/health`
+    const statusPageUrl = app.statusPageUrl || `http://${appHostname}:${app.port}${eurekaConfig.statusPageUrlPath ? eurekaConfig.statusPageUrlPath : '/actuator/status'}`
+    const healthCheckUrl = app.statusPageUrl ||  `http://${appHostname}:${app.port}${eurekaConfig.healthCheckUrlPath ? eurekaConfig.healthCheckUrlPath : '/actuator/health'}`
     const vipAddr = app.vipAddr || app.name.toUpperCase()
     const registerOpts = {
       appName: app.name,
@@ -60,7 +62,7 @@ class RegisterCommand extends Command {
       port: app.port,
       eurekaHostname: eurekaConfig.hostname || 'localhost',
       eurekaPort: eurekaConfig.port || 8761,
-      ip: app.ip,
+      ip: app.ip || '127.0.0.1',
       statusPageUrl,
       healthCheckUrl,
       vipAddr,
@@ -69,35 +71,63 @@ class RegisterCommand extends Command {
       registerWithEureka: true,
       fetchRegistry: true,
     }
-    await eureka.register(registerOpts)
+    this.log(`registering app: ${JSON.stringify({registerOpts}, null, 1)}`)
+    const instance = await eureka.register(registerOpts)
     this.log(`registered app: ${JSON.stringify({name: app.name, vipAddr, hostname: appHostname, port: app.port})}`)
+    return instance
   }
 
   async run() {
-    const {flags} = this.parse(RegisterCommand)
-    const {
-      configFile,
-      include,
-      exclude,
-      validateOnly,
-    } = flags
+    try {
+      const {flags} = this.parse(RegisterCommand)
+      const {
+        configFile,
+        include,
+        exclude,
+        validateOnly,
+        watch,
+      } = flags
 
-    const config =  await this.parseConfigFile(configFile, include, exclude)
-    this.validateConfig(config)
+      const config = await this.parseConfigFile(configFile, include, exclude)
+      this.validateConfig(config)
 
-    if (validateOnly) {
-      this.exit(0)
+      if (validateOnly) {
+        this.exit(0)
+      }
+      const filteredApps = this.filterApps(config.apps, include, exclude)
+      const eurekaConfig = config.eureka
+
+      const clientInstances = await Promise.all(filteredApps.map(async app => this.registerApp(eurekaConfig, app)))
+
+      const unregisterInstances = () => {
+        this.log('\nunregistering apps...')
+        return Promise.all(
+          clientInstances.map(instance => eureka.deregister(instance))
+        )
+      }
+
+      if (watch) {
+        this.log('watching app ... exit process to unregister')
+        process.on('SIGINT', () => {
+          unregisterInstances().then(() => process.exit()).catch(error => {
+            this.error('(SIGINT) Error unregistering instances', error)
+            process.exit(1)
+          })
+        })
+        process.on('SIGTERM', () => {
+          unregisterInstances().then(() => process.exit()).catch(error => {
+            this.log('(SIGTERM) Error unregistering instances', error)
+            process.exit(1)
+          })
+        })
+      } else {
+        this.log('Done registering apps !!')
+        this.exit()
+      }
+    } catch (error) {
+      this.log('Error running register-many:', error)
+      return super.catch(error)
     }
-    const filteredApps = this.filterApps(config.apps, include, exclude)
-    const eurekaConfig = config.eureka
-
-    for (let app of filteredApps) {
-      // eslint-disable-next-line no-await-in-loop
-      await this.registerApp(eurekaConfig, app)
-    }
-
-    this.log('Done registering apps !!')
-    this.exit()
   }
 }
 
@@ -123,8 +153,7 @@ Configurations must be defined in a config file in JSON format as such:
       "statusPageUrl": "http://localhost:80/status",
       "healthCheckUrl": "http://localhost:80/health"
     }
-    ]
-  }
+  ]
 }
 
 Properties descriptions:
@@ -181,6 +210,7 @@ RegisterCommand.flags = {
   exclude: flags.string({char: 'x', description: 'Comma separated regex pattern to match against service names to EXCLUDE from command'}),
   include: flags.string({char: 'i', description: 'Comma separated regex pattern to match against service names to INCLUDE from command'}),
   validateOnly: flags.boolean({char: 'v', description: 'Enable validation mode. Only config file is validated'}),
+  watch: flags.boolean({char: 'w', description: 'Watch clients and unregister on process exit'}),
 }
 
 module.exports = RegisterCommand
