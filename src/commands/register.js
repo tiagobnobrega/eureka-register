@@ -29,6 +29,7 @@ class RegisterCommand extends Command {
       vipAddr,
       statusPageUrl,
       healthCheckUrl,
+      watch,
     } = flags
 
     const registerOpts = {
@@ -47,9 +48,21 @@ class RegisterCommand extends Command {
       heartbeatInterval,
     }
     this.log(`Registering in eureka: \n${JSON.stringify(registerOpts, null, 1)}`)
-    await eureka.register(registerOpts)
-    this.log('Done')
-    this.exit()
+    const instance = await eureka.register(registerOpts)
+    this.log('client instance registered in eureka')
+    if (watch) {
+      this.log('watching instance ... exit process to unregister')
+      process.on('SIGINT', () => {
+        eureka.deregister(instance)
+        this.exit()
+      })
+      process.on('SIGTERM', () => {
+        eureka.deregister(instance)
+        this.exit()
+      })
+    } else {
+      this.exit()
+    }
   }
 }
 
@@ -70,6 +83,7 @@ RegisterCommand.flags = {
   vipAddr: flags.string({char: 'v', description: 'Service vip address. Default value is upper cased', default: '{NAME}'}),
   statusPageUrl: flags.string({char: 't', description: 'Service status page url', default: 'http://{HOSTNAME}:{PORT}/actuator/info'}),
   healthCheckUrl: flags.string({char: 'c', description: 'Service health check url', default: 'http://{HOSTNAME}:{PORT}/actuator/health'}),
+  watch: flags.boolean({char: 'w', description: 'Watch client and unregister on process exit'}),
 }
 
 module.exports = RegisterCommand

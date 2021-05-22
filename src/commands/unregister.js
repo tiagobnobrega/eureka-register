@@ -47,8 +47,8 @@ class UnregisterCommand extends Command {
       heartbeatInterval,
     }
     this.log(`Unregistering in eureka: \n${JSON.stringify(registerOpts, null, 1)}`)
-    await eureka.register(registerOpts)
-    await eureka.deregister()
+    const instance = await eureka.register(registerOpts)
+    await eureka.deregister(instance)
     this.log('Done!')
     this.exit()
   }
