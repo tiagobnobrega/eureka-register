@@ -6,9 +6,15 @@ const {promisify} = require('util')
 kc.loadFromDefault()
 
 const forward = new k8s.PortForward(kc)
+const k8sApi = kc.makeApiClient(k8s.CoreV1Api)
 const runningServers = []
 
-//kub -n gsg-hml get pod insurance-compensation-service-77cbcb648b-w85nn --template='{{(index (index .spec.containers 0).ports 0).containerPort}}{{"\n"}}'
+// kub -n gsg-hml get pod insurance-compensation-service-77cbcb648b-w85nn --template='{{(index (index .spec.containers 0).ports 0).containerPort}}{{"\n"}}'
+
+const listPods = async (namespace = 'default') => {
+  const resp = k8sApi.listNamespacedPod(namespace).then(res => res.body)
+  console.log(resp)
+}
 
 // This simple server just forwards traffic from itself to a service running in kubernetes
 // -> localhost:8080 -> port-forward-tunnel -> kubernetes-pod

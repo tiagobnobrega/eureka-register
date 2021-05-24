@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ccfb83e-6342-47c5-804e-6af5c88127e8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/eureka-kube-forward.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/kube-port-forward.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/commands/register-pods.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commands/register-many.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/commands/register-many.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commands/register.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/commands/register.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commands/unregister.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/commands/unregister.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/eureka.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/eureka.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/kube-port-forward.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/kube.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,7 +32,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="12.16.1" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/commands" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.standard" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -55,11 +48,11 @@
     <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$/src/commands" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/commands" />
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
@@ -75,7 +68,8 @@
       <updated>1621517309084</updated>
       <workItem from="1621517311147" duration="3577000" />
       <workItem from="1621524637238" duration="9798000" />
-      <workItem from="1621626797756" duration="9014000" />
+      <workItem from="1621626797756" duration="9613000" />
+      <workItem from="1621781219523" duration="3208000" />
     </task>
     <servers />
   </component>
